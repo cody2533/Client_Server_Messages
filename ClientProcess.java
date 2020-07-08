@@ -1,3 +1,8 @@
+//Course: CS4345
+//Semester/Year: Summer 2020
+//Assignment Identifier: Assignment 2
+//Cody Phillips and Jeremy Craven
+
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -8,6 +13,7 @@ class Client extends Thread{
 	boolean open = true;
 	String message;
 	
+	//Client Constructor
 	public Client(Socket socket, DataInputStream input){
 		this.socket = socket;
 		this.input = input;
@@ -50,20 +56,23 @@ public class ClientProcess{
 			
 			Scanner inp = new Scanner(System.in);
 			
+			//Open until user types 'exit'
 			while(open){
 				String message = inp.nextLine();
 				
 				data2server.writeUTF(message);
 				data2server.flush();
 				
+				//Allows the user to exit chat
 				if(message.equals("exit")){
 					open = false;
 				}
 			}
 			
 
-		 } catch(IOException ioe){
+		 } 
+		catch(IOException ioe){
 				System.err.println(ioe);
-			}
-	}//End-of-main
-}//End-ofclass
+		}
+	}
+}

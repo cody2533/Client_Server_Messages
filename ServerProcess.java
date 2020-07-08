@@ -1,3 +1,8 @@
+//Course: CS4345
+//Semester/Year: Summer 2020
+//Assignment Identifier: Assignment 2
+//Cody Phillips and Jeremy Craven
+
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -10,6 +15,7 @@ class Sock extends Thread {
 	DataOutputStream output;
 	String name;
 	
+	//Sock constructor
 	public Sock(Socket socket, DataInputStream input, DataOutputStream output){
 		this.socket = socket;
 		this.input = input;
@@ -30,14 +36,16 @@ class Sock extends Thread {
 			while(open){
 				message = input.readUTF();
 				if(message.equals("exit")){
-					open = MessageHandler.remove(socket, name);
-				} 
+					open = false;
+					MessageHandler.remove(socket, name);
+				}
 				else
 					MessageHandler.message(message, socket, name);
 			}
 		} 
 		catch(IOException ioe){
 			System.err.println(ioe);
+			MessageHandler.remove(socket, name);
 		}
 	}
 	
@@ -49,11 +57,11 @@ public class ServerProcess{
 		try{
 			ServerSocket servSock = new ServerSocket(7000);
 			System.out.println("Server started at "+ new Date() + '\n');
-			//System.out.println("Type 'STOP' to stop server");
+			
 			Socket sock = null;
 			boolean on = true;
-			//Scanner inp = new Scanner(System.in);
 			
+			//Keeps the server running
 			while(on) {
 				sock = servSock.accept();
 				//create data input and data output streams
@@ -65,12 +73,12 @@ public class ServerProcess{
 			sock.close();
 			servSock.close();
 			
-		 } catch(IOException ioe){
+		 } 
+		catch(IOException ioe){
 				System.err.println(ioe);
-			}
-
-	}//End-of-main
-}//End-of-class
+		}
+	}
+}
 
 class MessageHandler {
 	static Socket[] sockets;
@@ -80,6 +88,7 @@ class MessageHandler {
 		sockets = new Socket[0];
 	}
 	
+	//Adds a socket to the sockets array to keep track of connected sockets
 	public static void add(Socket socket, String name){
 		sockets = Arrays.copyOf(sockets, sockets.length + 1);
 		sockets[sockets.length - 1] = socket;
@@ -93,7 +102,9 @@ class MessageHandler {
 			}
 		}
 	}
-	public static boolean remove(Socket socket, String name){
+	
+	//removes a socket from the sockets array
+	public static void remove(Socket socket, String name){
 		Socket[] temp = Arrays.copyOf(sockets, sockets.length);
 		sockets = new Socket[sockets.length - 1];
 		int i = 0;
@@ -120,9 +131,9 @@ class MessageHandler {
 				}
 			}
 		}
-		return false;
 	}
 	
+	//Sends a message to each of the connected sockets
 	public static void message(String str, Socket socket, String name){ 
 		for(Socket s : sockets){
 			if(s != socket){
@@ -137,4 +148,3 @@ class MessageHandler {
 		}
 	}
 }
-
