@@ -5,6 +5,8 @@ import java.util.*;
 class Client extends Thread{
 	Socket socket;
 	DataInputStream input;
+	boolean open = true;
+	String message;
 	
 	public Client(Socket socket, DataInputStream input){
 		this.socket = socket;
@@ -13,9 +15,15 @@ class Client extends Thread{
 	
 	@Override
 	public void run(){
-		while(true){
+		while(open){
 			try{
-				System.out.println(input.readUTF());
+				message = input.readUTF();
+				System.out.println(message);
+				if(message.equals("Goodbye.")){
+					open = false;
+					socket.close();
+				}
+
 			}
 			catch(IOException ioe){
 				System.err.println(ioe);
@@ -44,12 +52,16 @@ public class ClientProcess{
 			
 			while(open){
 				String message = inp.nextLine();
+				
 				data2server.writeUTF(message);
 				data2server.flush();
+				
+				if(message.equals("exit")){
+					open = false;
+				}
 			}
 			
-			
-			sock.close();
+
 		 } catch(IOException ioe){
 				System.err.println(ioe);
 			}

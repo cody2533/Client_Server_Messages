@@ -18,14 +18,22 @@ class Sock extends Thread {
 	
 	@Override
 	public void run(){
+		String message;
+		boolean open = true;
 		
 		try {
 			output.writeUTF("Enter your name: ");
 			this.name = input.readUTF();
 			MessageHandler.add(socket, name);
+			output.writeUTF("Welcome " + name + ". Type 'exit' to leave.");
 		
-			while(true){
-				MessageHandler.message(input.readUTF(), socket, name);
+			while(open){
+				message = input.readUTF();
+				if(message.equals("exit")){
+					open = MessageHandler.remove(socket, name);
+				} 
+				else
+					MessageHandler.message(message, socket, name);
 			}
 		} 
 		catch(IOException ioe){
@@ -41,16 +49,17 @@ public class ServerProcess{
 		try{
 			ServerSocket servSock = new ServerSocket(7000);
 			System.out.println("Server started at "+ new Date() + '\n');
+			//System.out.println("Type 'STOP' to stop server");
 			Socket sock = null;
 			boolean on = true;
+			//Scanner inp = new Scanner(System.in);
 			
 			while(on) {
 				sock = servSock.accept();
-			
 				//create data input and data output streams
-				DataInputStream inp = new DataInputStream(sock.getInputStream());
-				DataOutputStream outp = new DataOutputStream(sock.getOutputStream());
-				Thread t = new Sock(sock, inp, outp);
+				DataInputStream input = new DataInputStream(sock.getInputStream());
+				DataOutputStream output = new DataOutputStream(sock.getOutputStream());
+				Thread t = new Sock(sock, input, output);
 				t.start();
 			}
 			sock.close();
@@ -83,6 +92,35 @@ class MessageHandler {
 				System.err.println(ioe);
 			}
 		}
+	}
+	public static boolean remove(Socket socket, String name){
+		Socket[] temp = Arrays.copyOf(sockets, sockets.length);
+		sockets = new Socket[sockets.length - 1];
+		int i = 0;
+		
+		for(Socket s : temp){
+			if(s != socket){
+				sockets[i] = s;
+				i++;
+				try {
+					output = new DataOutputStream(s.getOutputStream());
+					output.writeUTF(name + " has left the server.");
+				} 
+				catch(IOException ioe){
+					System.err.println(ioe);
+				}
+			}
+			else{
+				try {
+					output = new DataOutputStream(s.getOutputStream());
+					output.writeUTF("Goodbye.");
+				} 
+				catch(IOException ioe){
+					System.err.println(ioe);
+				}
+			}
+		}
+		return false;
 	}
 	
 	public static void message(String str, Socket socket, String name){ 
